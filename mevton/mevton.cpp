@@ -61,7 +61,7 @@ bool Mevton::IsEnabled() const {
 }
 
 void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message) {
-  dto::MempoolMessage mempool_message;
+  dto::MempoolExternalMessage mempool_message;
 
   mempool_message.set_hash(message->hash().to_hex());
   mempool_message.set_workchain_id(message->wc());
@@ -100,7 +100,7 @@ void Mevton::SubmitMessagesWorker() {
       break;
     }
 
-    dto::MempoolMessage pending_mempool_message;
+    dto::MempoolExternalMessage pending_mempool_message;
 
     dto::MempoolPacket packet;
 
@@ -110,7 +110,7 @@ void Mevton::SubmitMessagesWorker() {
     packet.set_expiration_ns(5000000);
 
     if (pending_mempool_messages.Consume(pending_mempool_message)) {
-      auto mempool_message = packet.add_messages();
+      auto mempool_message = packet.add_external_messages();
 
       mempool_message->set_hash(pending_mempool_message.hash());
       mempool_message->set_workchain_id(pending_mempool_message.workchain_id());
@@ -123,7 +123,7 @@ void Mevton::SubmitMessagesWorker() {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    if (packet.messages_size() > 0) {
+    if (packet.external_messages_size() > 0) {
       if (!writer->Write(packet)) {
         std::cerr << "Failed to write packet, restarting stream." << std::endl;
         context.TryCancel(); // Cancel the current context???

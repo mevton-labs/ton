@@ -47,7 +47,7 @@ class Mevton {
   std::unique_ptr<block_engine::BlockEngineValidator::Stub> block_engine_service;
   std::unique_ptr<searcher::SearcherService::Stub> searcher_service;
 
-  SafeQueue<dto::MempoolMessage> pending_mempool_messages;
+  SafeQueue<dto::MempoolExternalMessage> pending_mempool_messages;
   SafeQueue<dto::Bundle> pending_bundles;
 
   std::thread submit_messages_thread;
