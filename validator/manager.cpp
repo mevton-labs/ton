@@ -384,15 +384,6 @@ void ValidatorManagerImpl::new_external_message(td::BufferSlice data, int priori
     return;
   }
   if (ext_msgs_[priority].ext_messages_.size() > (size_t)max_mempool_num()) {
-    auto R = create_ext_message(std::move(data), last_masterchain_state_->get_ext_msg_limits());
-
-    if (R.is_error()) {
-      VLOG(VALIDATOR_NOTICE) << "failed to create ext message: " << R.move_as_error() << ", skipping push to mevton";
-      return;
-    }
-
-    mevton.SubmitExternalMessage(R.move_as_ok());
-
     return;
   }
   auto R = create_ext_message(std::move(data), last_masterchain_state_->get_ext_msg_limits());
@@ -461,7 +452,7 @@ void ValidatorManagerImpl::check_external_message(td::BufferSlice data, td::Prom
     });
   };
   ++ls_stats_check_ext_messages_;
-  run_check_external_message(std::move(message), actor_id(this), std::move(promise));
+  run_check_external_message(std::move(message), actor_id(this), &mevton, std::move(promise));
 }
 
 void ValidatorManagerImpl::new_ihr_message(td::BufferSlice data) {

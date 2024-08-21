@@ -60,7 +60,7 @@ bool Mevton::IsEnabled() const {
   return enabled;
 }
 
-void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message) {
+void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message, std::unique_ptr<block::transaction::Transaction> transaction) {
   dto::MempoolExternalMessage mempool_message;
 
   mempool_message.set_hash(message->hash().to_hex());
@@ -68,8 +68,15 @@ void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message) 
   mempool_message.set_shard(message->shard().to_str());
   mempool_message.set_data(message->serialize().as_slice().str());
   mempool_message.set_std_smc_address(message->addr().to_hex());
-//  mempool_message->set_events();
-//  mempool_message->set_gas_spent();
+  mempool_message.set_gas_spent(transaction->gas_used());
+
+  for (const auto& it : transaction->out_msgs) {
+    std::string* msg = mempool_message.add_out_msgs();
+
+    auto cs = load_cell_slice(it);
+
+    msg->assign(cs.as_bitslice().to_hex());
+  }
 
   pending_mempool_messages.Produce(std::move(mempool_message));
 }
@@ -107,18 +114,12 @@ void Mevton::SubmitMessagesWorker() {
     auto current_time = google::protobuf::util::TimeUtil::GetCurrentTime();
 
     packet.set_allocated_server_ts(&current_time);
-    packet.set_expiration_ns(5000000);
+    // @TODO: make it configurable
+    packet.set_expiration_ns(2000000);
 
     if (pending_mempool_messages.Consume(pending_mempool_message)) {
       auto mempool_message = packet.add_external_messages();
-
-      mempool_message->set_hash(pending_mempool_message.hash());
-      mempool_message->set_workchain_id(pending_mempool_message.workchain_id());
-      mempool_message->set_shard(pending_mempool_message.shard());
-      mempool_message->set_data(pending_mempool_message.data());
-      mempool_message->set_std_smc_address(pending_mempool_message.std_smc_address());
-//      mempool_message->set_events(pending_mempool_message.events());
-      mempool_message->set_gas_spent(pending_mempool_message.gas_spent());
+      mempool_message->MergeFrom(pending_mempool_message);
     } else {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }

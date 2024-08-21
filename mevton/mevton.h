@@ -15,6 +15,7 @@
 #include "searcher.grpc.pb.h"
 
 #include "validator/interfaces/external-message.h"
+#include "block/transaction.h"
 
 #include "crypto/Ed25519.h"
 
@@ -77,7 +78,7 @@ class Mevton {
 
   void Authenticate();
 
-  void SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message);
+  void SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message, std::unique_ptr<block::transaction::Transaction> transaction);
 
   std::list<dto::Bundle*> GetPendingBundles();
 
