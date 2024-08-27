@@ -39,7 +39,6 @@ jobs:
 
       - name: Test
         run: |
-          apt-get update && apt-get install -y libgrpc++1 libgrpc++-dev
           docker run --rm -e "TEST=1" ${{ env.REPOSITORY }}:test
 
       - name: Build and push
