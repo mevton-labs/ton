@@ -114,12 +114,12 @@ if ((ARCHITECTURE MATCHES "arm64") AND (CMAKE_SYSTEM_NAME STREQUAL "Darwin") AND
 endif()
 #END M1 support
 
-if (TON_USE_ABSEIL)
-  message("Add abseil-cpp")
-  set(ABSL_PROPAGATE_CXX_STD TRUE)
-  add_subdirectory(third-party/abseil-cpp EXCLUDE_FROM_ALL)
-  set(ABSL_FOUND 1)
-endif()
+#if (TON_USE_ABSEIL)
+#  message("Add abseil-cpp")
+#  set(ABSL_PROPAGATE_CXX_STD TRUE)
+#  add_subdirectory(third-party/abseil-cpp EXCLUDE_FROM_ALL)
+#  set(ABSL_FOUND 1)
+#endif()
 
 #add_subdirectory(third-party/libcuckoo EXCLUDE_FROM_ALL)
 #add_subdirectory(third-party/junction EXCLUDE_FROM_ALL)

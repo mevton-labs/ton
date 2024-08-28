@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(FETCHCONTENT_QUIET OFF)
 set(ABSL_PROPAGATE_CXX_STD ON)
-set(ABSL_ENABLE_INSTALL ON)
+#set(ABSL_ENABLE_INSTALL ON)
 find_package(ZLIB REQUIRED)
 
 include(FetchContent)
@@ -52,7 +52,7 @@ FetchContent_Declare(
             "third_party/cares"
             "third_party/boringssl-with-bazel"
             "third_party/re2"
-#            "third_party/abseil-cpp"
+            "third_party/abseil-cpp"
 )
 
 set(gRPC_BUILD_TESTS OFF)
