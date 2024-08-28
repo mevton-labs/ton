@@ -3,24 +3,21 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(CMAKE_POLICY_DEFAULT_CMP0074 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
-set(gRPC_USE_STATIC_LIBS ON)
 
-find_package(Protobuf CONFIG REQUIRED)
-find_package(grpc REQUIRED)
+set(FETCHCONTENT_QUIET OFF)
+set(ABSL_PROPAGATE_CXX_STD ON)
+set(ABSL_ENABLE_INSTALL ON)
+find_package(ZLIB REQUIRED)
 
-if(NOT TARGET protobuf::protoc)
+if(NOT TARGET protoc)
     message(FATAL_ERROR "Can not find target protoc")
 endif()
-get_target_property(_gRPC_PROTOBUF_PROTOC_EXECUTABLE protobuf::protoc LOCATION)
-get_target_property(_gRPC_CPP_PLUGIN gRPC::grpc_cpp_plugin LOCATION)
-get_target_property(_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR protobuf::libprotobuf INTERFACE_INCLUDE_DIRECTORIES)
-
-message(STATUS "Found protoc ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}")
-message(STATUS "Found grpc-cpp-pluggin ${_gRPC_CPP_PLUGIN}")
-message(STATUS "Found protobuf include dir ${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR}")
+set(_gRPC_PROTOBUF_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
 
 set(_gRPC_PROTO_GENS_DIR ${CMAKE_BINARY_DIR}/grpc-gens)
 file(MAKE_DIRECTORY ${_gRPC_PROTO_GENS_DIR})
+set(_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src")
+
 
 function(target_add_protobuf target)
     if(NOT TARGET ${target})
@@ -50,39 +47,40 @@ function(target_add_protobuf target)
             set(RELFIL_WE "${REL_DIR}/${FIL_WE}")
         endif()
 
-        if(NOT TARGET gRPC::grpc_cpp_plugin)
+        if(NOT TARGET grpc_cpp_plugin)
             message(FATAL_ERROR "Can not find target grpc_cpp_plugin")
         endif()
+        set(_gRPC_CPP_PLUGIN $<TARGET_FILE:grpc_cpp_plugin>)
 
         add_custom_command(
-        OUTPUT  "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+                OUTPUT  "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
                 "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
                 "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
                 "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
                 "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
-        COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
-            --cpp_out=${_gRPC_PROTO_GENS_DIR}
-            --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
-            ${_protobuf_include_path}
-            ${FIL}
-        DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Running gRPC C++ protocol buffer compiler on ${FIL}"
-        VERBATIM)
+                COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}
+                ARGS --grpc_out=generate_mock_code=true:${_gRPC_PROTO_GENS_DIR}
+                --cpp_out=${_gRPC_PROTO_GENS_DIR}
+                --plugin=protoc-gen-grpc=${_gRPC_CPP_PLUGIN}
+                ${_protobuf_include_path}
+                ${FIL}
+                DEPENDS ${ABS_FIL} ${_gRPC_PROTOBUF_PROTOC} ${_gRPC_CPP_PLUGIN}
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                COMMENT "Running gRPC C++ protocol buffer compiler on ${FIL}"
+                VERBATIM)
 
         target_sources(${target} PRIVATE
-            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
-            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
-            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
-            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
-            "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
-        )
+                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.cc"
+                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.grpc.pb.h"
+                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}_mock.grpc.pb.h"
+                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.cc"
+                "${_gRPC_PROTO_GENS_DIR}/${RELFIL_WE}.pb.h"
+                )
         target_include_directories(${target} PRIVATE
-            $<BUILD_INTERFACE:${_gRPC_PROTO_GENS_DIR}>
-            $<BUILD_INTERFACE:${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR}>
-            $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/include>
-        )
+                $<BUILD_INTERFACE:${_gRPC_PROTO_GENS_DIR}>
+                $<BUILD_INTERFACE:${_gRPC_PROTOBUF_WELLKNOWN_INCLUDE_DIR}>
+                $<BUILD_INTERFACE:${grpc_SOURCE_DIR}/include>
+                )
     endforeach()
 endfunction()
 
@@ -106,4 +104,4 @@ target_include_directories(mevton
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/..
 )
-target_link_libraries(mevton PUBLIC tdactor tl-utils gRPC::grpc gRPC::grpc++ protobuf::libprotobuf)
+target_link_libraries(mevton PUBLIC tdactor tl-utils grpc grpc++ libprotobuf)
