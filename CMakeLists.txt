@@ -121,6 +121,8 @@ endif()
   set(ABSL_FOUND 1)
 #endif()
 
+set(ORIG_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
+
 # protobuf
 
 set(protobuf_INSTALL OFF)
@@ -158,8 +160,14 @@ set(gRPC_ZLIB_PROVIDER "package" CACHE STRING "" FORCE)
 # that require full protobuf
 set(gRPC_USE_PROTO_LITE ON CACHE BOOL "" FORCE)
 
-#add_subdirectory(third-party/grpc/third_party/protobuf EXCLUDE_FROM_ALL)
 add_subdirectory(third-party/grpc EXCLUDE_FROM_ALL)
+
+set(BUILD_SHARED_LIBS "${ORIG_BUILD_SHARED_LIBS}")
+
+if (NOT ORIG_BUILD_SHARED_LIBS)
+  unset(BUILD_SHARED_LIBS)
+  unset(BUILD_SHARED_LIBS CACHE)
+endif()
 
 #######
 
@@ -450,8 +458,9 @@ add_subdirectory(tl-utils)
 add_subdirectory(adnl)
 add_subdirectory(crypto)
 add_subdirectory(lite-client)
-add_subdirectory(emulator)
 add_subdirectory(mevton)
+
+add_subdirectory(emulator)
 
 #BEGIN tonlib
 add_subdirectory(tonlib)
