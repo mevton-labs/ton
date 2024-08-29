@@ -131,7 +131,7 @@ set(protobuf_BUILD_EXAMPLES OFF)
 set(protobuf_BUILD_PROTOC_BINARIES ON)
 set(protobuf_DISABLE_RTTI ON)
 set(protobuf_MSVC_STATIC_RUNTIME ON)
-set(BUILD_SHARED_LIBS OFF)
+set(protobuf_BUILD_SHARED_LIBS OFF)
 set(protobuf_WITH_ZLIB ON CACHE BOOL "" FORCE)
 #add_subdirectory(third-party/protobuf EXCLUDE_FROM_ALL)
 
