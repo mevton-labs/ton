@@ -113,7 +113,7 @@ struct ValidatorManagerOptions : public td::CntObject {
 
   virtual bool get_mevton_enabled() const = 0;
   virtual std::string get_mevton_addr() const = 0;
-  virtual std::string get_mevton_private_key() const = 0;
+  virtual ton::PrivateKey get_mevton_private_key() const = 0;
 
   virtual void set_zero_block_id(BlockIdExt block_id) = 0;
   virtual void set_init_block_id(BlockIdExt block_id) = 0;
@@ -148,7 +148,7 @@ struct ValidatorManagerOptions : public td::CntObject {
 
   virtual void set_mevton_enabled(bool value) = 0;
   virtual void set_mevton_addr(std::string value) = 0;
-  virtual void set_mevton_private_key(std::string value) = 0;
+  virtual void set_mevton_private_key(ton::PrivateKey) = 0;
 
   static td::Ref<ValidatorManagerOptions> create(
       BlockIdExt zero_block_id, BlockIdExt init_block_id,

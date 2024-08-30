@@ -550,7 +550,7 @@ class ValidatorManagerImpl : public ValidatorManager {
                        td::actor::ActorId<keyring::Keyring> keyring, td::actor::ActorId<adnl::Adnl> adnl,
                        td::actor::ActorId<rldp::Rldp> rldp, td::actor::ActorId<overlay::Overlays> overlays)
       : opts_(std::move(opts)), db_root_(db_root), keyring_(keyring), adnl_(adnl), rldp_(rldp), overlays_(overlays),
-        mevton(opts_->get_mevton_enabled(), opts_->get_mevton_addr(), td::SecureString(td::Slice(opts_->get_mevton_private_key()))) {
+        mevton(opts_->get_mevton_enabled(), opts_->get_mevton_addr(), std::move(opts_->get_mevton_private_key())) {
   }
 
  public:

@@ -14,6 +14,7 @@
 #include "searcher.pb.h"
 #include "searcher.grpc.pb.h"
 
+#include "keys/keys.hpp"
 #include "validator/interfaces/external-message.h"
 #include "block/transaction.h"
 
@@ -63,12 +64,17 @@ class Mevton {
   auth::GenerateAuthChallengeResponse GenerateAuthChallenge();
 
  public:
-  Mevton(bool enabled, const std::string& server_addr, td::SecureString private_key): enabled(enabled), channel(CreateSecureChannel(server_addr)), private_key(std::move(private_key)) {
-    auth_service = auth::AuthService::NewStub(channel);
-    block_engine_service = block_engine::BlockEngineValidator::NewStub(channel);
-    searcher_service = searcher::SearcherService::NewStub(channel);
-
+  Mevton(bool enabled, const std::string& server_addr, ton::PrivateKey private_key):
+      enabled(enabled),
+      stopped(false),
+      channel(enabled ? CreateSecureChannel(server_addr) : nullptr),
+      private_key(private_key.export_as_slice())
+  {
     if (enabled) {
+      auth_service = auth::AuthService::NewStub(channel);
+      block_engine_service = block_engine::BlockEngineValidator::NewStub(channel);
+      searcher_service = searcher::SearcherService::NewStub(channel);
+
       submit_messages_thread = std::thread(&Mevton::SubmitMessagesWorker, this);
       fetch_pending_bundles_thread = std::thread(&Mevton::FetchPendingBundlesWorker, this);
     }

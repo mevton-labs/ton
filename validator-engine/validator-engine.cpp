@@ -1482,7 +1482,10 @@ td::Status ValidatorEngine::load_global_config() {
 
   validator_options_.write().set_mevton_enabled(conf.mevton_->enabled_);
   validator_options_.write().set_mevton_addr(conf.mevton_->server_addr_);
-  validator_options_.write().set_mevton_private_key(conf.mevton_->private_key_);
+
+  ton::PrivateKey mevton_private_key{conf.mevton_->private_key_};
+
+  validator_options_.write().set_mevton_private_key(mevton_private_key);
 
   return td::Status::OK();
 }

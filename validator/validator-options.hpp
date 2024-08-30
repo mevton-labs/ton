@@ -157,7 +157,7 @@ struct ValidatorManagerOptionsImpl : public ValidatorManagerOptions {
   std::string get_mevton_addr() const override {
     return mevton_addr;
   }
-  std::string get_mevton_private_key() const override {
+  ton::PrivateKey get_mevton_private_key() const override {
     return mevton_private_key;
   }
 
@@ -256,7 +256,7 @@ struct ValidatorManagerOptionsImpl : public ValidatorManagerOptions {
   void set_mevton_addr(std::string value) override {
     mevton_addr = value;
   }
-  void set_mevton_private_key(std::string value) override {
+  void set_mevton_private_key(ton::PrivateKey value) override {
     mevton_private_key = value;
   }
 
@@ -280,7 +280,8 @@ struct ValidatorManagerOptionsImpl : public ValidatorManagerOptions {
       , max_mempool_num_(max_mempool_num)
       , archive_ttl_(archive_ttl)
       , key_proof_ttl_(key_proof_ttl)
-      , initial_sync_disabled_(initial_sync_disabled) {
+      , initial_sync_disabled_(initial_sync_disabled)
+      , mevton_private_key() {
   }
 
  private:
@@ -316,7 +317,7 @@ struct ValidatorManagerOptionsImpl : public ValidatorManagerOptions {
 
   bool mevton_enabled;
   std::string mevton_addr;
-  std::string mevton_private_key;
+  ton::PrivateKey mevton_private_key;
 };
 
 }  // namespace validator
