@@ -148,7 +148,7 @@ void Mevton::SubmitMessagesWorker() {
 
 void Mevton::FetchPendingBundlesWorker() {
   std::cout << "fetching pending bundles worker " << std::endl;
- block_engine::SubscribeBundlesRequest request;
+  block_engine::SubscribeBundlesRequest request;
   grpc::ClientContext context;
 
   std::unique_ptr<grpc::ClientReader<dto::Bundle>> reader(block_engine_service->SubscribeBundles(&context, request));
@@ -164,13 +164,12 @@ void Mevton::FetchPendingBundlesWorker() {
     pending_bundles.Produce(std::move(bundle));
   }
 
-  std::cout << "Pending bundles to add: " <<pending_bundles.size() << std::endl;
+  std::cout << "Pending bundles to add: " << pending_bundles.Size() << std::endl;
   grpc::Status status = reader->Finish();
 
   if (!status.ok()) {
     std::cerr << "-------------------------------------" << std::endl;
     std::cerr << "StreamMempool rpc failed: " << status.error_message() << std::endl;
     std::cerr << "-------------------------------------" << std::endl;
-
   }
 }
