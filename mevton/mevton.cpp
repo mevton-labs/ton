@@ -103,7 +103,6 @@ void Mevton::SubmitMessagesWorker() {
   grpc::ClientContext context;
   auto writer = block_engine_service->StreamMempool(&context, &response);
 
-
   std::cout << "submitting messages worker " << std::endl;
   while (true) {
     if (stopped) {
@@ -140,7 +139,7 @@ void Mevton::SubmitMessagesWorker() {
   grpc::Status status = writer->Finish();
   if (!status.ok()) {
     std::cerr << "-------------------------------------" << std::endl;
-    std::cerr << "StreamMempool rpc failed: " << status.error_message() << std::endl;
+    std::cerr << "StreamMempool rpc failed, code: " << status.error_code() << ", message: " << status.error_message() << ", details: " << status.error_details() << std::endl;
     std::cerr << "-------------------------------------" << std::endl;
   }
 }
@@ -168,7 +167,7 @@ void Mevton::FetchPendingBundlesWorker() {
 
   if (!status.ok()) {
     std::cerr << "-------------------------------------" << std::endl;
-    std::cerr << "StreamMempool rpc failed: " << status.error_message() << std::endl;
+    std::cerr << "FetchPendingBundles rpc failed, code: " << status.error_code() << ", message: " << status.error_message() << ", details: " << status.error_details() << std::endl;
     std::cerr << "-------------------------------------" << std::endl;
   }
 }
