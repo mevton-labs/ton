@@ -50,6 +50,7 @@ auth::GenerateAuthTokensResponse Mevton::GenerateAccessTokens(const auth::Genera
   );
 
   if (status.ok()) {
+    LOG(DEBUG) << "Token created successfully";
     return *generate_auth_tokens_response.get();
   } else {
     throw MevtonException("Failed to generate auth tokens");
@@ -70,8 +71,14 @@ void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message, 
   mempool_message.set_std_smc_address(message->addr().to_hex());
   mempool_message.set_gas_spent(transaction->gas_used());
 
+  LOG(DEBUG) << "Submitting new external message with hex address=" << message->addr().to_hex();
+  LOG(DEBUG) << "Message hash=" << message->hash().to_hex();
+  LOG(DEBUG) << "Number of out messages for the transaction=" <<  transaction->out_msgs.size();
+  LOG(DEBUG) << "Transaction gas number" <<  transaction->gas_used();
+
   for (const auto& it : transaction->out_msgs) {
     std::string* msg = mempool_message.add_out_msgs();
+
 
     auto cs = load_cell_slice(it);
 
@@ -118,6 +125,7 @@ void Mevton::SubmitMessagesWorker() {
     packet.set_expiration_ns(2000000);
 
     if (pending_mempool_messages.Consume(pending_mempool_message)) {
+      LOG(DEBUG) << "Add pending mempool message in the packet mempool structure";
       auto mempool_message = packet.add_external_messages();
       mempool_message->MergeFrom(pending_mempool_message);
     } else {
@@ -125,6 +133,7 @@ void Mevton::SubmitMessagesWorker() {
     }
 
     if (packet.external_messages_size() > 0) {
+      LOG(DEBUG) << "Mevton::SubmitMessagesWorker: Received mempool message= "<< packet.external_messages_size();
       if (!writer->Write(packet)) {
         std::cerr << "Failed to write packet, restarting stream." << std::endl;
         context.TryCancel(); // Cancel the current context???

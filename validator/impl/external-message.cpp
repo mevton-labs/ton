@@ -172,7 +172,9 @@ td::Status ExtMessageQ::run_message_on_account(ton::WorkchainId wc,
      return td::Status::Error("Cannot commit new transaction for smart contract");
    }
 
+   LOG(DEBUG) << "Started call mevton submit external message";
    mevton->SubmitExternalMessage(message, std::move(trans));
+   LOG(DEBUG) << "Finished called mevton submit external message";
 
    return td::Status::OK();
 }
