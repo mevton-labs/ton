@@ -72,9 +72,9 @@ void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message, 
   mempool_message.set_gas_spent(transaction->gas_used());
 
   LOG(DEBUG) << "Submitting new external message with hex address=" << message->addr().to_hex();
-  LOG(DEBUG) << "Message hash=" << message->hash().to_hex();
-  LOG(DEBUG) << "Number of out messages for the transaction=" <<  transaction->out_msgs.size();
-  LOG(DEBUG) << "Transaction gas number" <<  transaction->gas_used();
+  //LOG(DEBUG) << "Message hash=" << message->hash().to_hex();
+  //LOG(DEBUG) << "Number of out messages for the transaction=" <<  transaction->out_msgs.size();
+  //LOG(DEBUG) << "Transaction gas number" <<  transaction->gas_used();
 
   for (const auto& it : transaction->out_msgs) {
     std::string* msg = mempool_message.add_out_msgs();
@@ -133,7 +133,9 @@ void Mevton::SubmitMessagesWorker() {
     }
 
     if (packet.external_messages_size() > 0) {
-      LOG(DEBUG) << "Mevton::SubmitMessagesWorker: Received mempool message= "<< packet.external_messages_size();
+    //  LOG(DEBUG) << "Mevton::SubmitMessagesWorker: Received mempool message= "<< packet.external_messages_size();
+    LOG(DEBUG) << "Mevton::SubmitMessagesWorker: Received mempool";
+
       if (!writer->Write(packet)) {
         std::cerr << "Failed to write packet, restarting stream." << std::endl;
         context.TryCancel(); // Cancel the current context???
