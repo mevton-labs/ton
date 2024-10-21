@@ -19,22 +19,24 @@ COPY ./ ./
 
 RUN mkdir build && \
         cd build && \
-        cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DPORTABLE=1 -DTON_ARCH= -DTON_USE_JEMALLOC=ON .. && \
+        cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DPORTABLE=1 -DTON_ARCH= -DTON_USE_JEMALLOC=ON .. && \
         ninja storage-daemon storage-daemon-cli tonlibjson fift func validator-engine validator-engine-console generate-random-id dht-server lite-client
 
 FROM ubuntu:22.04
 RUN apt-get update && \
-    apt-get install -y wget curl libatomic1 openssl libsecp256k1-dev libsodium-dev libmicrohttpd-dev liblz4-dev libjemalloc-dev htop net-tools netcat iptraf-ng jq tcpdump pv plzip && \
+    apt-get install -y wget curl libatomic1 openssl libsecp256k1-dev libsodium-dev libmicrohttpd-dev liblz4-dev \
+    libjemalloc-dev htop net-tools netcat iptraf-ng jq tcpdump plzip pv curl lzip tar && \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /var/ton-work/db /var/ton-work/scripts
 
 COPY --from=builder /ton/build/storage/storage-daemon/storage-daemon /usr/local/bin/
 COPY --from=builder /ton/build/storage/storage-daemon/storage-daemon-cli /usr/local/bin/
-COPY --from=builder /ton/build/lite-client/lite-client /usr/local/bin/
+COPY --from=builder /ton/build/lite-client/lite-client /usr/local/bin/ /usr/bin/ton/lite-client/
 COPY --from=builder /ton/build/validator-engine/validator-engine /usr/local/bin/
-COPY --from=builder /ton/build/validator-engine-console/validator-engine-console /usr/local/bin/
+COPY --from=builder /ton/build/validator-engine-console/validator-engine-console /usr/local/bin/ /usr/bin/ton/validator-engine-console/
 COPY --from=builder /ton/build/utils/generate-random-id /usr/local/bin/
+COPY --from=builder /ton/build/crypto/fift /usr/local/bin/ /usr/bin/ton/crypto/
 
 WORKDIR /var/ton-work/db
 COPY ./docker/init.sh ./docker/control.template /var/ton-work/scripts/
