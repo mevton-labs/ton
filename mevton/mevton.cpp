@@ -111,9 +111,7 @@ void Mevton::SubmitMessagesWorker() {
 
     dto::MempoolPacket packet;
 
-    auto current_time = google::protobuf::util::TimeUtil::GetCurrentTime();
-
-    packet.set_allocated_server_ts(&current_time);
+    packet.mutable_server_ts()->MergeFrom(google::protobuf::util::TimeUtil::GetCurrentTime());
     // @TODO: make it configurable
     packet.set_expiration_ns(2000000);
 
