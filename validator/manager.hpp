@@ -44,6 +44,10 @@
 
 static int HIGH_PRIORITY_EXTERNAL;
 
+#include "mevton/mevton.h"
+
+static int HIGH_PRIORITY_EXTERNAL;
+
 namespace ton {
 
 namespace validator {
