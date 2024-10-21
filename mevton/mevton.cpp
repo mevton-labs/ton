@@ -105,6 +105,7 @@ void Mevton::SubmitMessagesWorker() {
   VLOG(INFO) << "Starting submitting bundles worker";
 
   block_engine::StreamMempoolResponse response;
+
   grpc::ClientContext context;
   auto writer = block_engine_service->StreamMempool(&context, &response);
 
@@ -116,7 +117,6 @@ void Mevton::SubmitMessagesWorker() {
     }
 
     dto::MempoolExternalMessage pending_mempool_message;
-
     dto::MempoolPacket packet;
 
     packet.mutable_server_ts()->MergeFrom(google::protobuf::util::TimeUtil::GetCurrentTime());
@@ -135,8 +135,13 @@ void Mevton::SubmitMessagesWorker() {
       VLOG(INFO) << "Sending Mempool packet, messages: " << packet.external_messages_size();
       if (!writer->Write(packet)) {
         VLOG(ERROR) << "Failed to write packet, restarting stream.";
-        context.TryCancel(); // Cancel the current context???
-        writer = block_engine_service->StreamMempool(&context, &response);
+        writer->WritesDone();
+        grpc::Status status = writer->Finish();
+        if (!status.ok()) {
+          VLOG(ERROR) << "Writer->Finish failed, code " << status.error_code() << ", message " << status.error_message() << ", details " << status.error_details();
+        }
+        grpc::ClientContext new_context;  // Creamos un nuevo contexto
+        writer = block_engine_service->StreamMempool(&new_context, &response);  // Nuevo stream con el nuevo contexto
       }
     }
   }
