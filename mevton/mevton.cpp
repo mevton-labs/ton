@@ -155,6 +155,7 @@ void Mevton::SubmitMessagesWorker() {
   if (!status.ok()) {
     VLOG(ERROR) << "Writer->Finish failed, code " << status.error_code() << ", message " << status.error_message() << ", details " << status.error_details();
   }
+  delete context;
 }
 
 void Mevton::FetchPendingBundlesWorker() {
