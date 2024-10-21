@@ -106,8 +106,8 @@ void Mevton::SubmitMessagesWorker() {
 
   block_engine::StreamMempoolResponse response;
 
-  grpc::ClientContext context;
-  auto writer = block_engine_service->StreamMempool(&context, &response);
+  grpc::ClientContext* context = new grpc::ClientContext();
+  auto writer = block_engine_service->StreamMempool(context, &response);
 
   VLOG(INFO) << "Started to submit bundles";
 
@@ -140,8 +140,10 @@ void Mevton::SubmitMessagesWorker() {
         if (!status.ok()) {
           VLOG(ERROR) << "Writer->Finish failed, code " << status.error_code() << ", message " << status.error_message() << ", details " << status.error_details();
         }
-        grpc::ClientContext new_context;  // Creamos un nuevo contexto
-        writer = block_engine_service->StreamMempool(&new_context, &response);  // Nuevo stream con el nuevo contexto
+        delete context;
+        context = new grpc::ClientContext();  // set up new context
+        writer = block_engine_service->StreamMempool(context, &response);  // add the new one
+
       }
     }
   }
