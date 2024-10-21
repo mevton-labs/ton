@@ -98,9 +98,13 @@ void Mevton::ResetPendingBundles() {
 }
 
 void Mevton::SubmitMessagesWorker() {
+  VLOG(INFO) << "Starting submitting bundles worker";
+
   block_engine::StreamMempoolResponse response;
   grpc::ClientContext context;
   auto writer = block_engine_service->StreamMempool(&context, &response);
+
+  VLOG(INFO) << "Started to submit bundles";
 
   while (true) {
     if (stopped) {
@@ -112,6 +116,7 @@ void Mevton::SubmitMessagesWorker() {
     dto::MempoolPacket packet;
 
     packet.mutable_server_ts()->MergeFrom(google::protobuf::util::TimeUtil::GetCurrentTime());
+
     // @TODO: make it configurable
     packet.set_expiration_ns(2000000);
 
@@ -123,22 +128,27 @@ void Mevton::SubmitMessagesWorker() {
     }
 
     if (packet.external_messages_size() > 0) {
+      VLOG(INFO) << "Sending Mempool packet, messages: " << packet.external_messages_size();
       if (!writer->Write(packet)) {
-        std::cerr << "Failed to write packet, restarting stream." << std::endl;
+        VLOG(ERROR) << "Failed to write packet, restarting stream.";
         context.TryCancel(); // Cancel the current context???
         writer = block_engine_service->StreamMempool(&context, &response);
       }
     }
   }
 
+  VLOG(INFO) << "Stopped writing packets, pending bundles count " << pending_bundles.Size();
+
   writer->WritesDone();
   grpc::Status status = writer->Finish();
   if (!status.ok()) {
-    std::cerr << "StreamMempool rpc failed: " << status.error_message() << std::endl;
+    VLOG(ERROR) << "Writer->Finish failed, code " << status.error_code() << ", message " << status.error_message() << ", details " << status.error_details();
   }
 }
 
 void Mevton::FetchPendingBundlesWorker() {
+  VLOG(INFO) << "Starting fetch pending worker";
+
   block_engine::SubscribeBundlesRequest request;
   grpc::ClientContext context;
 
@@ -146,17 +156,23 @@ void Mevton::FetchPendingBundlesWorker() {
 
   dto::Bundle bundle;
 
+  VLOG(INFO) << "Started to read bundles";
+
   while (reader->Read(&bundle)) {
     if (stopped) {
       break;
     }
 
+    VLOG(INFO) << "Read bundle, messages " << bundle.message_size();
+
     pending_bundles.Produce(std::move(bundle));
   }
+
+  VLOG(INFO) << "Stopped reading bundles, pending bundles count " << pending_bundles.Size();
 
   grpc::Status status = reader->Finish();
 
   if (!status.ok()) {
-    std::cerr << "StreamMempool rpc failed: " << status.error_message() << std::endl;
+    VLOG(ERROR) << "Reader->Finish, code " << status.error_code() << ", message " << status.error_message() << ", details " << status.error_details();
   }
 }
