@@ -18,17 +18,23 @@ WORKDIR /ton
 COPY ./ ./
 
 RUN mkdir build && \
-        cd build && \
-        cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DPORTABLE=1 -DTON_ARCH= -DTON_USE_JEMALLOC=ON .. && \
-        ninja storage-daemon storage-daemon-cli tonlibjson fift func validator-engine validator-engine-console generate-random-id dht-server lite-client
+	cd build && \
+	cmake .. -DCMAKE_BUILD_TYPE=Debug && \
+	make -j 4
 
 FROM ubuntu:22.04
 RUN apt-get update && \
     apt-get install -y wget curl libatomic1 openssl libsecp256k1-dev libsodium-dev libmicrohttpd-dev liblz4-dev \
-    libjemalloc-dev htop net-tools netcat iptraf-ng jq tcpdump plzip pv curl lzip tar && \
+    libjemalloc-dev htop net-tools netcat iptraf-ng jq tcpdump plzip pv curl lzip tar python3 nano && \
     rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /var/ton-work/db /var/ton-work/scripts
+RUN mkdir -p /var/ton-work/db /var/ton-work/scripts && \
+    mkdir -p /usr/local/lib/fift && \
+    mkdir -p /var/ton-work/db/static && \
+    mkdir -p /usr/local/lib/fift && \
+    mkdir -p /var/ton-work/contracts && \
+    mkdir -p /var/ton-work/db/keyring && \
+    mkdir -p /var/ton-work/validator_scripts
 
 COPY --from=builder /ton/build/storage/storage-daemon/storage-daemon /usr/local/bin/
 COPY --from=builder /ton/build/storage/storage-daemon/storage-daemon-cli /usr/local/bin/
@@ -37,6 +43,15 @@ COPY --from=builder /ton/build/validator-engine/validator-engine /usr/local/bin/
 COPY --from=builder /ton/build/validator-engine-console/validator-engine-console /usr/local/bin/ /usr/bin/ton/validator-engine-console/
 COPY --from=builder /ton/build/utils/generate-random-id /usr/local/bin/
 COPY --from=builder /ton/build/crypto/fift /usr/local/bin/ /usr/bin/ton/crypto/
+
+COPY --from=builder /ton/build/test-ton-collator /usr/local/bin
+COPY --from=builder /ton/build/crypto/func /usr/local/bin
+
+ENV FIFTPATH=/usr/local/lib/fift
+COPY --from=builder /ton/crypto/fift/lib /usr/local/lib/fift
+COPY --from=builder /ton/crypto/smartcont /var/ton-work/contracts
+COPY --from=builder /ton/build/crypto/create-state /var/ton-work/contracts
+COPY --from=builder /ton/build/dht-server/dht-server /usr/local/bin
 
 WORKDIR /var/ton-work/db
 COPY ./docker/init.sh ./docker/control.template /var/ton-work/scripts/
