@@ -38,7 +38,7 @@ jobs:
           IMAGE_URI="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/mevton-labs/mevton-ton-validator:${{ github.sha }}"
 
           # Build the Docker image
-          docker build -t $IMAGE_URI .
+          docker build -t $IMAGE_URI -f Dockerfile.validator .
 
       # Push the Docker image to Amazon ECR
       - name: Push Docker image to ECR
