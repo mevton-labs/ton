@@ -70,9 +70,9 @@ void Mevton::SubmitExternalMessage(td::Ref<ton::validator::ExtMessage> message, 
   mempool_message.set_std_smc_address(message->addr().to_hex());
   mempool_message.set_gas_spent(transaction->gas_used());
 
-  LOG(DEBUG) << "Submitting new external message with hex address=" << message->addr().to_hex();
-  LOG(DEBUG) << "Message hash=" << message->hash().to_hex();
-  LOG(DEBUG) << "Number of out messages for the transaction=" <<  transaction->out_msgs.size();
+  VLOG(INFO) << "Submitting new external message with hex address=" << message->addr().to_hex();
+  VLOG(INFO) << "Message hash=" << message->hash().to_hex();
+  VLOG(INFO) << "Number of out messages for the transaction=" <<  transaction->out_msgs.size();
 
   for (const auto& it : transaction->out_msgs) {
     std::string* msg = mempool_message.add_out_msgs();
