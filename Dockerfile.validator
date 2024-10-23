@@ -20,7 +20,7 @@ COPY ./ ./
 RUN mkdir build && \
 	cd build && \
 	 cmake -GNinja -DCMAKE_BUILD_TYPE=Debug -DPORTABLE=1 -DTON_ARCH= -DTON_USE_JEMALLOC=ON .. && \
-	ninja storage-daemon storage-daemon-cli tonlibjson fift func validator-engine validator-engine-console generate-random-id dht-server lite-client test-ton-collator
+	ninja storage-daemon storage-daemon-cli tonlibjson fift func validator-engine validator-engine-console generate-random-id dht-server lite-client create-state
 
 FROM ubuntu:22.04
 RUN apt-get update && \
@@ -44,7 +44,7 @@ COPY --from=builder /ton/build/validator-engine-console/validator-engine-console
 COPY --from=builder /ton/build/utils/generate-random-id /usr/local/bin/
 COPY --from=builder /ton/build/crypto/fift /usr/local/bin/ /usr/bin/ton/crypto/
 
-COPY --from=builder /ton/build/test-ton-collator /usr/local/bin
+#COPY --from=builder /ton/build/test-ton-collator /usr/local/bin
 COPY --from=builder /ton/build/crypto/func /usr/local/bin
 
 ENV FIFTPATH=/usr/local/lib/fift
