@@ -38,7 +38,7 @@ RUN mkdir -p /var/ton-work/db /var/ton-work/scripts && \
 
 COPY --from=builder /ton/build/storage/storage-daemon/storage-daemon /usr/local/bin/
 COPY --from=builder /ton/build/storage/storage-daemon/storage-daemon-cli /usr/local/bin/
-COPY --from=builder /ton/build/lite-client/lite-client /usr/local/bin/ /usr/bin/ton/lite-client/
+COPY --from=builder /ton/build/lite-client/lite-client /usr/local/bin/
 COPY --from=builder /ton/build/validator-engine/validator-engine /usr/local/bin/
 COPY --from=builder /ton/build/validator-engine-console/validator-engine-console /usr/local/bin/
 COPY --from=builder /ton/build/utils/generate-random-id /usr/local/bin/
